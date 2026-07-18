@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransactionSpecification.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">financa-facil-backend</a> &gt; <a href="index.source.html" class="el_package">com.financafacil.infrastructure.persistence.specification</a> &gt; <span class="el_source">TransactionSpecification.java</span></div><h1>TransactionSpecification.java</h1><pre class="source lang-java linenums">package com.financafacil.infrastructure.persistence.specification;
+
+import com.financafacil.domain.port.out.TransactionRepository.TransactionFilter;
+import com.financafacil.infrastructure.persistence.entity.TransactionJpaEntity;
+import org.springframework.data.jpa.domain.Specification;
+import java.util.UUID;
+
+<span class="nc" id="L8">public class TransactionSpecification {</span>
+
+    public static Specification&lt;TransactionJpaEntity&gt; forUser(UUID userId) {
+<span class="fc" id="L11">        return (root, query, cb) -&gt; cb.equal(root.get(&quot;userId&quot;), userId);</span>
+    }
+
+    public static Specification&lt;TransactionJpaEntity&gt; withFilter(UUID userId, TransactionFilter filter) {
+<span class="fc" id="L15">        Specification&lt;TransactionJpaEntity&gt; spec = forUser(userId);</span>
+<span class="pc bpc" id="L16" title="1 of 2 branches missed.">        if (filter.startDate() != null) {</span>
+<span class="nc" id="L17">            spec = spec.and((r, q, cb) -&gt; cb.greaterThanOrEqualTo(r.get(&quot;transactionDate&quot;), filter.startDate()));</span>
+        }
+<span class="pc bpc" id="L19" title="1 of 2 branches missed.">        if (filter.endDate() != null) {</span>
+<span class="nc" id="L20">            spec = spec.and((r, q, cb) -&gt; cb.lessThanOrEqualTo(r.get(&quot;transactionDate&quot;), filter.endDate()));</span>
+        }
+<span class="pc bpc" id="L22" title="1 of 2 branches missed.">        if (filter.categoryId() != null) {</span>
+<span class="nc" id="L23">            spec = spec.and((r, q, cb) -&gt; cb.equal(r.get(&quot;categoryId&quot;), filter.categoryId()));</span>
+        }
+<span class="pc bpc" id="L25" title="1 of 2 branches missed.">        if (filter.accountId() != null) {</span>
+<span class="nc" id="L26">            spec = spec.and((r, q, cb) -&gt; cb.equal(r.get(&quot;accountId&quot;), filter.accountId()));</span>
+        }
+<span class="pc bpc" id="L28" title="1 of 2 branches missed.">        if (filter.type() != null) {</span>
+<span class="fc" id="L29">            spec = spec.and((r, q, cb) -&gt; cb.equal(r.get(&quot;type&quot;), filter.type()));</span>
+        }
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">        if (filter.status() != null) {</span>
+<span class="nc" id="L32">            spec = spec.and((r, q, cb) -&gt; cb.equal(r.get(&quot;status&quot;), filter.status()));</span>
+        }
+<span class="fc" id="L34">        return spec;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

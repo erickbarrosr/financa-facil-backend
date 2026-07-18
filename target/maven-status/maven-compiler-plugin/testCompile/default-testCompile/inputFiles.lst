@@ -1,0 +1,12 @@
+/home/erezende/financa-facil/financa-facil-backend/src/test/java/com/financafacil/application/usecase/AccountUseCaseImplTest.java
+/home/erezende/financa-facil/financa-facil-backend/src/test/java/com/financafacil/application/usecase/AuthUseCaseImplTest.java
+/home/erezende/financa-facil/financa-facil-backend/src/test/java/com/financafacil/application/usecase/BudgetUseCaseImplTest.java
+/home/erezende/financa-facil/financa-facil-backend/src/test/java/com/financafacil/application/usecase/CategoryUseCaseImplTest.java
+/home/erezende/financa-facil/financa-facil-backend/src/test/java/com/financafacil/application/usecase/DashboardUseCaseImplTest.java
+/home/erezende/financa-facil/financa-facil-backend/src/test/java/com/financafacil/application/usecase/RecurringTransactionUseCaseImplTest.java
+/home/erezende/financa-facil/financa-facil-backend/src/test/java/com/financafacil/application/usecase/TransactionUseCaseImplTest.java
+/home/erezende/financa-facil/financa-facil-backend/src/test/java/com/financafacil/application/usecase/TransferUseCaseImplTest.java
+/home/erezende/financa-facil/financa-facil-backend/src/test/java/com/financafacil/infrastructure/security/jwt/JwtServiceTest.java
+/home/erezende/financa-facil/financa-facil-backend/src/test/java/com/financafacil/presentation/controller/AccountControllerIntegrationTest.java
+/home/erezende/financa-facil/financa-facil-backend/src/test/java/com/financafacil/presentation/controller/AuthControllerIntegrationTest.java
+/home/erezende/financa-facil/financa-facil-backend/src/test/java/com/financafacil/presentation/controller/TransactionControllerIntegrationTest.java

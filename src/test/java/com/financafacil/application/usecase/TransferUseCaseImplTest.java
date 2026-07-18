@@ -1,5 +1,6 @@
 package com.financafacil.application.usecase;
 
+import com.financafacil.domain.exception.ConflictException;
 import com.financafacil.domain.exception.NotFoundException;
 import com.financafacil.domain.model.Transfer;
 import com.financafacil.domain.port.out.AccountRepository;
@@ -66,6 +67,14 @@ class TransferUseCaseImplTest {
                 BigDecimal.valueOf(100), LocalDate.now(), null))
             .isInstanceOf(NotFoundException.class)
             .hasMessageContaining("destino");
+    }
+
+    @Test
+    void create_throwsConflict_whenSameAccount() {
+        var accountId = UUID.randomUUID();
+        assertThatThrownBy(() ->
+            transferUseCase.create(userId, accountId, accountId, BigDecimal.valueOf(100), LocalDate.now(), null))
+            .isInstanceOf(ConflictException.class);
     }
 
     @Test

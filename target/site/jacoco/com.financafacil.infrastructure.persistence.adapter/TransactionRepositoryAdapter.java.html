@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransactionRepositoryAdapter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">financa-facil-backend</a> &gt; <a href="index.source.html" class="el_package">com.financafacil.infrastructure.persistence.adapter</a> &gt; <span class="el_source">TransactionRepositoryAdapter.java</span></div><h1>TransactionRepositoryAdapter.java</h1><pre class="source lang-java linenums">package com.financafacil.infrastructure.persistence.adapter;
+
+import com.financafacil.domain.model.Transaction;
+import com.financafacil.domain.port.out.TransactionRepository;
+import com.financafacil.infrastructure.persistence.jpa.TransactionJpaRepository;
+import com.financafacil.infrastructure.persistence.mapper.TransactionJpaMapper;
+import com.financafacil.infrastructure.persistence.specification.TransactionSpecification;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
+import org.springframework.stereotype.Component;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Component
+@RequiredArgsConstructor
+public class TransactionRepositoryAdapter implements TransactionRepository {
+    private final TransactionJpaRepository jpaRepository;
+    private final TransactionJpaMapper mapper;
+
+    @Override
+    public Transaction save(Transaction t) {
+<span class="fc" id="L25">        return mapper.toDomain(jpaRepository.save(mapper.toEntity(t)));</span>
+    }
+
+    @Override
+    public Optional&lt;Transaction&gt; findById(UUID id, UUID userId) {
+<span class="fc" id="L30">        return jpaRepository.findByIdAndUserId(id, userId).map(mapper::toDomain);</span>
+    }
+
+    @Override
+    public Page&lt;Transaction&gt; findAll(UUID userId, TransactionFilter filter, Pageable pageable) {
+<span class="fc" id="L35">        var spec = TransactionSpecification.withFilter(userId, filter);</span>
+<span class="fc" id="L36">        return jpaRepository.findAll(spec, pageable).map(mapper::toDomain);</span>
+    }
+
+    @Override
+    public void deleteById(UUID id, UUID userId) {
+<span class="fc" id="L41">        jpaRepository.findByIdAndUserId(id, userId).ifPresent(jpaRepository::delete);</span>
+<span class="fc" id="L42">    }</span>
+
+    @Override
+    public List&lt;Transaction&gt; findByUserIdAndDateBetween(UUID userId, LocalDate start, LocalDate end) {
+<span class="nc" id="L46">        return jpaRepository.findByUserIdAndDateBetween(userId, start, end)</span>
+<span class="nc" id="L47">            .stream().map(mapper::toDomain).collect(Collectors.toList());</span>
+    }
+
+    @Override
+    public List&lt;Transaction&gt; findByAccountIdAndDateBetween(UUID accountId, LocalDate start, LocalDate end) {
+<span class="nc" id="L52">        return jpaRepository.findByAccountIdAndDateBetween(accountId, start, end)</span>
+<span class="nc" id="L53">            .stream().map(mapper::toDomain).collect(Collectors.toList());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

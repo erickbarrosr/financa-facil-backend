@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AccountUseCaseImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">financa-facil-backend</a> &gt; <a href="index.source.html" class="el_package">com.financafacil.application.usecase</a> &gt; <span class="el_source">AccountUseCaseImpl.java</span></div><h1>AccountUseCaseImpl.java</h1><pre class="source lang-java linenums">package com.financafacil.application.usecase;
+
+import com.financafacil.domain.exception.ConflictException;
+import com.financafacil.domain.exception.NotFoundException;
+import com.financafacil.domain.model.Account;
+import com.financafacil.domain.port.in.AccountUseCase;
+import com.financafacil.domain.port.out.AccountRepository;
+import com.financafacil.presentation.dto.response.AccountResponse;
+import com.financafacil.presentation.mapper.AccountPresentationMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class AccountUseCaseImpl implements AccountUseCase {
+    private final AccountRepository accountRepository;
+    private final AccountPresentationMapper presentationMapper;
+
+    @Override
+    @Transactional
+    public AccountResponse create(UUID userId, String name, String type, BigDecimal initialBalance, String color) {
+<span class="fc" id="L28">        var account = accountRepository.save(Account.builder()</span>
+<span class="fc" id="L29">            .id(UUID.randomUUID())</span>
+<span class="fc" id="L30">            .userId(userId)</span>
+<span class="fc" id="L31">            .name(name)</span>
+<span class="fc" id="L32">            .type(type)</span>
+<span class="fc" id="L33">            .balance(initialBalance)</span>
+<span class="fc" id="L34">            .color(color)</span>
+<span class="fc" id="L35">            .createdAt(Instant.now())</span>
+<span class="fc" id="L36">            .updatedAt(Instant.now())</span>
+<span class="fc" id="L37">            .build());</span>
+<span class="fc" id="L38">        return presentationMapper.toResponse(account);</span>
+    }
+
+    @Override
+    public List&lt;AccountResponse&gt; findAll(UUID userId) {
+<span class="fc" id="L43">        return accountRepository.findAllByUserId(userId).stream()</span>
+<span class="fc" id="L44">            .map(presentationMapper::toResponse)</span>
+<span class="fc" id="L45">            .collect(Collectors.toList());</span>
+    }
+
+    @Override
+    @Transactional
+    public AccountResponse update(UUID userId, UUID accountId, String name, String type, String color) {
+<span class="fc" id="L51">        var account = accountRepository.findById(accountId, userId)</span>
+<span class="pc" id="L52">            .orElseThrow(() -&gt; new NotFoundException(&quot;Conta não encontrada&quot;));</span>
+<span class="fc" id="L53">        var updated = accountRepository.save(account</span>
+<span class="fc" id="L54">            .withName(name)</span>
+<span class="fc" id="L55">            .withType(type)</span>
+<span class="fc" id="L56">            .withColor(color)</span>
+<span class="fc" id="L57">            .withUpdatedAt(Instant.now()));</span>
+<span class="fc" id="L58">        return presentationMapper.toResponse(updated);</span>
+    }
+
+    @Override
+    @Transactional
+    public void delete(UUID userId, UUID accountId) {
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        if (!accountRepository.existsByIdAndUserId(accountId, userId)) {</span>
+<span class="fc" id="L65">            throw new NotFoundException(&quot;Conta não encontrada&quot;);</span>
+        }
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">        if (accountRepository.hasTransactions(accountId)) {</span>
+<span class="fc" id="L68">            throw new ConflictException(&quot;Não é possível remover uma conta com transações&quot;);</span>
+        }
+<span class="nc" id="L70">        accountRepository.deleteById(accountId, userId);</span>
+<span class="nc" id="L71">    }</span>
+
+    @Override
+    public BigDecimal getBalance(UUID userId, UUID accountId) {
+<span class="fc" id="L75">        return accountRepository.findById(accountId, userId)</span>
+<span class="fc" id="L76">            .map(Account::getBalance)</span>
+<span class="pc" id="L77">            .orElseThrow(() -&gt; new NotFoundException(&quot;Conta não encontrada&quot;));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

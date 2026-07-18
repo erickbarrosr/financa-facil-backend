@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransferController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">financa-facil-backend</a> &gt; <a href="index.source.html" class="el_package">com.financafacil.presentation.controller</a> &gt; <span class="el_source">TransferController.java</span></div><h1>TransferController.java</h1><pre class="source lang-java linenums">package com.financafacil.presentation.controller;
+
+import com.financafacil.domain.port.in.TransferUseCase;
+import com.financafacil.presentation.dto.request.CreateTransferRequest;
+import com.financafacil.presentation.dto.response.ApiResponse;
+import com.financafacil.presentation.dto.response.TransferResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping(&quot;/transfers&quot;)
+@RequiredArgsConstructor
+public class TransferController {
+    private final TransferUseCase transferUseCase;
+
+    @GetMapping
+    public ApiResponse&lt;List&lt;TransferResponse&gt;&gt; findAll(@AuthenticationPrincipal Object principal) {
+<span class="nc" id="L23">        return ApiResponse.ok(transferUseCase.findAll(toUuid(principal)));</span>
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse&lt;TransferResponse&gt; create(@AuthenticationPrincipal Object principal,
+                                                @Valid @RequestBody CreateTransferRequest req) {
+<span class="nc" id="L30">        return ApiResponse.ok(transferUseCase.create(</span>
+<span class="nc" id="L31">            toUuid(principal),</span>
+<span class="nc" id="L32">            req.getFromAccountId(),</span>
+<span class="nc" id="L33">            req.getToAccountId(),</span>
+<span class="nc" id="L34">            req.getAmount(),</span>
+<span class="nc" id="L35">            req.getTransferDate(),</span>
+<span class="nc" id="L36">            req.getDescription()));</span>
+    }
+
+    @DeleteMapping(&quot;/{id}&quot;)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@AuthenticationPrincipal Object principal, @PathVariable UUID id) {
+<span class="nc" id="L42">        transferUseCase.delete(toUuid(principal), id);</span>
+<span class="nc" id="L43">    }</span>
+
+    private UUID toUuid(Object principal) {
+<span class="nc" id="L46">        return UUID.fromString(principal.toString());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

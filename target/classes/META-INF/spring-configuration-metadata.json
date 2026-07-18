@@ -1,0 +1,73 @@
+{
+  "groups": [
+    {
+      "name": "app",
+      "type": "com.financafacil.infrastructure.config.AppProperties",
+      "sourceType": "com.financafacil.infrastructure.config.AppProperties"
+    },
+    {
+      "name": "app.cors",
+      "type": "com.financafacil.infrastructure.config.AppProperties$Cors",
+      "sourceType": "com.financafacil.infrastructure.config.AppProperties",
+      "sourceMethod": "getCors()"
+    },
+    {
+      "name": "app.frontend",
+      "type": "com.financafacil.infrastructure.config.AppProperties$Frontend",
+      "sourceType": "com.financafacil.infrastructure.config.AppProperties",
+      "sourceMethod": "getFrontend()"
+    },
+    {
+      "name": "app.jwt",
+      "type": "com.financafacil.infrastructure.config.AppProperties$Jwt",
+      "sourceType": "com.financafacil.infrastructure.config.AppProperties",
+      "sourceMethod": "getJwt()"
+    },
+    {
+      "name": "app.mail",
+      "type": "com.financafacil.infrastructure.config.AppProperties$Mail",
+      "sourceType": "com.financafacil.infrastructure.config.AppProperties",
+      "sourceMethod": "getMail()"
+    }
+  ],
+  "properties": [
+    {
+      "name": "app.cors.allowed-origins",
+      "type": "java.lang.String",
+      "sourceType": "com.financafacil.infrastructure.config.AppProperties$Cors"
+    },
+    {
+      "name": "app.frontend.url",
+      "type": "java.lang.String",
+      "sourceType": "com.financafacil.infrastructure.config.AppProperties$Frontend"
+    },
+    {
+      "name": "app.jwt.access-expiration-ms",
+      "type": "java.lang.Long",
+      "sourceType": "com.financafacil.infrastructure.config.AppProperties$Jwt",
+      "defaultValue": 0
+    },
+    {
+      "name": "app.jwt.access-secret",
+      "type": "java.lang.String",
+      "sourceType": "com.financafacil.infrastructure.config.AppProperties$Jwt"
+    },
+    {
+      "name": "app.jwt.refresh-expiration-ms",
+      "type": "java.lang.Long",
+      "sourceType": "com.financafacil.infrastructure.config.AppProperties$Jwt",
+      "defaultValue": 0
+    },
+    {
+      "name": "app.jwt.refresh-secret",
+      "type": "java.lang.String",
+      "sourceType": "com.financafacil.infrastructure.config.AppProperties$Jwt"
+    },
+    {
+      "name": "app.mail.from",
+      "type": "java.lang.String",
+      "sourceType": "com.financafacil.infrastructure.config.AppProperties$Mail"
+    }
+  ],
+  "hints": []
+}

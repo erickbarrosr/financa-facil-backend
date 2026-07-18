@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BudgetRepositoryAdapter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">financa-facil-backend</a> &gt; <a href="index.source.html" class="el_package">com.financafacil.infrastructure.persistence.adapter</a> &gt; <span class="el_source">BudgetRepositoryAdapter.java</span></div><h1>BudgetRepositoryAdapter.java</h1><pre class="source lang-java linenums">package com.financafacil.infrastructure.persistence.adapter;
+
+import com.financafacil.domain.model.Budget;
+import com.financafacil.domain.port.out.BudgetRepository;
+import com.financafacil.infrastructure.persistence.jpa.BudgetJpaRepository;
+import com.financafacil.infrastructure.persistence.mapper.BudgetJpaMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Component
+@RequiredArgsConstructor
+public class BudgetRepositoryAdapter implements BudgetRepository {
+    private final BudgetJpaRepository jpaRepository;
+    private final BudgetJpaMapper mapper;
+
+    @Override
+    public Budget save(Budget budget) {
+<span class="nc" id="L23">        return mapper.toDomain(jpaRepository.save(mapper.toEntity(budget)));</span>
+    }
+
+    @Override
+    public Optional&lt;Budget&gt; findById(UUID id, UUID userId) {
+<span class="nc" id="L28">        return jpaRepository.findByIdAndUserId(id, userId).map(mapper::toDomain);</span>
+    }
+
+    @Override
+    public List&lt;Budget&gt; findAllByUserId(UUID userId) {
+<span class="nc" id="L33">        return jpaRepository.findAllByUserId(userId).stream()</span>
+<span class="nc" id="L34">            .map(mapper::toDomain)</span>
+<span class="nc" id="L35">            .collect(Collectors.toList());</span>
+    }
+
+    @Override
+    @Transactional
+    public void deleteById(UUID id, UUID userId) {
+<span class="nc" id="L41">        jpaRepository.deleteByIdAndUserId(id, userId);</span>
+<span class="nc" id="L42">    }</span>
+
+    @Override
+    public boolean existsByUserIdAndCategoryIdAndMonthAndYear(UUID userId, UUID categoryId, int month, int year) {
+<span class="nc" id="L46">        return jpaRepository.existsByUserIdAndCategoryIdAndMonthAndYear(userId, categoryId, month, year);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CategoryJpaMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">financa-facil-backend</a> &gt; <a href="index.source.html" class="el_package">com.financafacil.infrastructure.persistence.mapper</a> &gt; <span class="el_source">CategoryJpaMapperImpl.java</span></div><h1>CategoryJpaMapperImpl.java</h1><pre class="source lang-java linenums">package com.financafacil.infrastructure.persistence.mapper;
+
+import com.financafacil.domain.model.Category;
+import com.financafacil.infrastructure.persistence.entity.CategoryJpaEntity;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    date = &quot;2026-07-18T18:18:29-0300&quot;,
+    comments = &quot;version: 1.6.3, compiler: javac, environment: Java 21.0.11 (Ubuntu)&quot;
+)
+@Component
+<span class="fc" id="L14">public class CategoryJpaMapperImpl implements CategoryJpaMapper {</span>
+
+    @Override
+    public CategoryJpaEntity toEntity(Category category) {
+<span class="nc bnc" id="L18" title="All 2 branches missed.">        if ( category == null ) {</span>
+<span class="nc" id="L19">            return null;</span>
+        }
+
+<span class="nc" id="L22">        CategoryJpaEntity.CategoryJpaEntityBuilder categoryJpaEntity = CategoryJpaEntity.builder();</span>
+
+<span class="nc" id="L24">        categoryJpaEntity.id( category.getId() );</span>
+<span class="nc" id="L25">        categoryJpaEntity.userId( category.getUserId() );</span>
+<span class="nc" id="L26">        categoryJpaEntity.name( category.getName() );</span>
+<span class="nc" id="L27">        categoryJpaEntity.type( category.getType() );</span>
+<span class="nc" id="L28">        categoryJpaEntity.icon( category.getIcon() );</span>
+<span class="nc" id="L29">        categoryJpaEntity.color( category.getColor() );</span>
+<span class="nc" id="L30">        categoryJpaEntity.createdAt( category.getCreatedAt() );</span>
+<span class="nc" id="L31">        categoryJpaEntity.updatedAt( category.getUpdatedAt() );</span>
+
+<span class="nc" id="L33">        return categoryJpaEntity.build();</span>
+    }
+
+    @Override
+    public Category toDomain(CategoryJpaEntity entity) {
+<span class="nc bnc" id="L38" title="All 2 branches missed.">        if ( entity == null ) {</span>
+<span class="nc" id="L39">            return null;</span>
+        }
+
+<span class="nc" id="L42">        Category.CategoryBuilder category = Category.builder();</span>
+
+<span class="nc" id="L44">        category.id( entity.getId() );</span>
+<span class="nc" id="L45">        category.userId( entity.getUserId() );</span>
+<span class="nc" id="L46">        category.name( entity.getName() );</span>
+<span class="nc" id="L47">        category.type( entity.getType() );</span>
+<span class="nc" id="L48">        category.icon( entity.getIcon() );</span>
+<span class="nc" id="L49">        category.color( entity.getColor() );</span>
+<span class="nc" id="L50">        category.createdAt( entity.getCreatedAt() );</span>
+<span class="nc" id="L51">        category.updatedAt( entity.getUpdatedAt() );</span>
+
+<span class="nc" id="L53">        return category.build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

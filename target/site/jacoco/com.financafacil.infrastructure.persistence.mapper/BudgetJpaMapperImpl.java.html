@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BudgetJpaMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">financa-facil-backend</a> &gt; <a href="index.source.html" class="el_package">com.financafacil.infrastructure.persistence.mapper</a> &gt; <span class="el_source">BudgetJpaMapperImpl.java</span></div><h1>BudgetJpaMapperImpl.java</h1><pre class="source lang-java linenums">package com.financafacil.infrastructure.persistence.mapper;
+
+import com.financafacil.domain.model.Budget;
+import com.financafacil.infrastructure.persistence.entity.BudgetJpaEntity;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    date = &quot;2026-07-18T18:18:29-0300&quot;,
+    comments = &quot;version: 1.6.3, compiler: javac, environment: Java 21.0.11 (Ubuntu)&quot;
+)
+@Component
+<span class="fc" id="L14">public class BudgetJpaMapperImpl implements BudgetJpaMapper {</span>
+
+    @Override
+    public BudgetJpaEntity toEntity(Budget budget) {
+<span class="nc bnc" id="L18" title="All 2 branches missed.">        if ( budget == null ) {</span>
+<span class="nc" id="L19">            return null;</span>
+        }
+
+<span class="nc" id="L22">        BudgetJpaEntity.BudgetJpaEntityBuilder budgetJpaEntity = BudgetJpaEntity.builder();</span>
+
+<span class="nc" id="L24">        budgetJpaEntity.id( budget.getId() );</span>
+<span class="nc" id="L25">        budgetJpaEntity.userId( budget.getUserId() );</span>
+<span class="nc" id="L26">        budgetJpaEntity.categoryId( budget.getCategoryId() );</span>
+<span class="nc" id="L27">        budgetJpaEntity.amount( budget.getAmount() );</span>
+<span class="nc" id="L28">        budgetJpaEntity.createdAt( budget.getCreatedAt() );</span>
+<span class="nc" id="L29">        budgetJpaEntity.updatedAt( budget.getUpdatedAt() );</span>
+
+<span class="nc" id="L31">        budgetJpaEntity.month( (short) budget.getMonth() );</span>
+<span class="nc" id="L32">        budgetJpaEntity.year( (short) budget.getYear() );</span>
+
+<span class="nc" id="L34">        return budgetJpaEntity.build();</span>
+    }
+
+    @Override
+    public Budget toDomain(BudgetJpaEntity entity) {
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        if ( entity == null ) {</span>
+<span class="nc" id="L40">            return null;</span>
+        }
+
+<span class="nc" id="L43">        Budget.BudgetBuilder budget = Budget.builder();</span>
+
+<span class="nc" id="L45">        budget.id( entity.getId() );</span>
+<span class="nc" id="L46">        budget.userId( entity.getUserId() );</span>
+<span class="nc" id="L47">        budget.categoryId( entity.getCategoryId() );</span>
+<span class="nc" id="L48">        budget.amount( entity.getAmount() );</span>
+<span class="nc" id="L49">        budget.createdAt( entity.getCreatedAt() );</span>
+<span class="nc" id="L50">        budget.updatedAt( entity.getUpdatedAt() );</span>
+
+<span class="nc" id="L52">        budget.month( (int) entity.getMonth() );</span>
+<span class="nc" id="L53">        budget.year( (int) entity.getYear() );</span>
+
+<span class="nc" id="L55">        return budget.build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

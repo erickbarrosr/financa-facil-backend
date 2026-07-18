@@ -1,5 +1,6 @@
 package com.financafacil.application.usecase;
 
+import com.financafacil.domain.exception.ConflictException;
 import com.financafacil.domain.exception.NotFoundException;
 import com.financafacil.domain.model.Transfer;
 import com.financafacil.domain.port.in.TransferUseCase;
@@ -29,6 +30,9 @@ public class TransferUseCaseImpl implements TransferUseCase {
     @Transactional
     public TransferResponse create(UUID userId, UUID fromAccountId, UUID toAccountId,
                                    BigDecimal amount, LocalDate transferDate, String description) {
+        if (fromAccountId.equals(toAccountId)) {
+            throw new ConflictException("Conta de origem e destino não podem ser iguais");
+        }
         if (!accountRepository.existsByIdAndUserId(fromAccountId, userId)) {
             throw new NotFoundException("Conta de origem não encontrada");
         }

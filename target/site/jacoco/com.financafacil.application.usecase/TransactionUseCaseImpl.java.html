@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransactionUseCaseImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">financa-facil-backend</a> &gt; <a href="index.source.html" class="el_package">com.financafacil.application.usecase</a> &gt; <span class="el_source">TransactionUseCaseImpl.java</span></div><h1>TransactionUseCaseImpl.java</h1><pre class="source lang-java linenums">package com.financafacil.application.usecase;
+
+import com.financafacil.domain.exception.NotFoundException;
+import com.financafacil.domain.model.Transaction;
+import com.financafacil.domain.port.in.TransactionUseCase;
+import com.financafacil.domain.port.out.AccountRepository;
+import com.financafacil.domain.port.out.TransactionRepository;
+import com.financafacil.domain.port.out.TransactionRepository.TransactionFilter;
+import com.financafacil.presentation.dto.response.PageResponse;
+import com.financafacil.presentation.dto.response.TransactionResponse;
+import com.financafacil.presentation.mapper.TransactionPresentationMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class TransactionUseCaseImpl implements TransactionUseCase {
+    private final TransactionRepository transactionRepository;
+    private final AccountRepository accountRepository;
+    private final TransactionPresentationMapper presentationMapper;
+
+    @Override
+    @Transactional
+    public TransactionResponse create(UUID userId, UUID accountId, UUID categoryId, String type,
+                                      BigDecimal amount, String description, LocalDate transactionDate, String status) {
+        // Validate account ownership
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        if (!accountRepository.existsByIdAndUserId(accountId, userId)) {</span>
+<span class="fc" id="L35">            throw new NotFoundException(&quot;Conta não encontrada&quot;);</span>
+        }
+
+<span class="fc" id="L38">        var transaction = transactionRepository.save(Transaction.builder()</span>
+<span class="fc" id="L39">            .id(UUID.randomUUID())</span>
+<span class="fc" id="L40">            .userId(userId)</span>
+<span class="fc" id="L41">            .accountId(accountId)</span>
+<span class="fc" id="L42">            .categoryId(categoryId)</span>
+<span class="fc" id="L43">            .type(type)</span>
+<span class="fc" id="L44">            .amount(amount)</span>
+<span class="fc" id="L45">            .description(description)</span>
+<span class="fc" id="L46">            .transactionDate(transactionDate)</span>
+<span class="fc" id="L47">            .status(status)</span>
+<span class="fc" id="L48">            .createdAt(Instant.now())</span>
+<span class="fc" id="L49">            .updatedAt(Instant.now())</span>
+<span class="fc" id="L50">            .build());</span>
+
+        // Atomic incremental balance update — avoids lost-update race condition
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        var delta = &quot;income&quot;.equals(type) ? amount : amount.negate();</span>
+<span class="fc" id="L54">        accountRepository.adjustBalance(accountId, delta);</span>
+
+<span class="fc" id="L56">        return presentationMapper.toResponse(transaction);</span>
+    }
+
+    @Override
+    @Transactional
+    public TransactionResponse update(UUID userId, UUID transactionId, UUID accountId, UUID categoryId,
+                                      String type, BigDecimal amount, String description,
+                                      LocalDate transactionDate, String status) {
+<span class="fc" id="L64">        var existing = transactionRepository.findById(transactionId, userId)</span>
+<span class="fc" id="L65">            .orElseThrow(() -&gt; new NotFoundException(&quot;Transação não encontrada&quot;));</span>
+
+        // Revert balance effect of the original transaction on the original account
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">        var revertDelta = &quot;income&quot;.equals(existing.getType()) ? existing.getAmount().negate() : existing.getAmount();</span>
+<span class="fc" id="L69">        accountRepository.adjustBalance(existing.getAccountId(), revertDelta);</span>
+
+        // If account changed, validate that the new account belongs to the user
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        if (!accountId.equals(existing.getAccountId())) {</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">            if (!accountRepository.existsByIdAndUserId(accountId, userId)) {</span>
+<span class="fc" id="L74">                throw new NotFoundException(&quot;Conta de destino não encontrada&quot;);</span>
+            }
+        }
+
+        // Apply new balance effect on the (potentially new) account
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        var newDelta = &quot;income&quot;.equals(type) ? amount : amount.negate();</span>
+<span class="fc" id="L80">        accountRepository.adjustBalance(accountId, newDelta);</span>
+
+<span class="fc" id="L82">        var updated = transactionRepository.save(existing</span>
+<span class="fc" id="L83">            .withAccountId(accountId)</span>
+<span class="fc" id="L84">            .withCategoryId(categoryId)</span>
+<span class="fc" id="L85">            .withType(type)</span>
+<span class="fc" id="L86">            .withAmount(amount)</span>
+<span class="fc" id="L87">            .withDescription(description)</span>
+<span class="fc" id="L88">            .withTransactionDate(transactionDate)</span>
+<span class="fc" id="L89">            .withStatus(status)</span>
+<span class="fc" id="L90">            .withUpdatedAt(Instant.now()));</span>
+
+<span class="fc" id="L92">        return presentationMapper.toResponse(updated);</span>
+    }
+
+    @Override
+    @Transactional
+    public void delete(UUID userId, UUID transactionId) {
+<span class="fc" id="L98">        var tx = transactionRepository.findById(transactionId, userId)</span>
+<span class="fc" id="L99">            .orElseThrow(() -&gt; new NotFoundException(&quot;Transação não encontrada&quot;));</span>
+
+        // Revert the balance effect atomically before deleting
+<span class="fc bfc" id="L102" title="All 2 branches covered.">        var revertDelta = &quot;income&quot;.equals(tx.getType()) ? tx.getAmount().negate() : tx.getAmount();</span>
+<span class="fc" id="L103">        accountRepository.adjustBalance(tx.getAccountId(), revertDelta);</span>
+<span class="fc" id="L104">        transactionRepository.deleteById(transactionId, userId);</span>
+<span class="fc" id="L105">    }</span>
+
+    @Override
+    public PageResponse&lt;TransactionResponse&gt; findAll(UUID userId, TransactionFilter filter, Pageable pageable) {
+<span class="fc" id="L109">        var page = transactionRepository.findAll(userId, filter, pageable);</span>
+<span class="fc" id="L110">        return PageResponse.&lt;TransactionResponse&gt;builder()</span>
+<span class="fc" id="L111">            .content(page.getContent().stream().map(presentationMapper::toResponse).collect(Collectors.toList()))</span>
+<span class="fc" id="L112">            .page(page.getNumber())</span>
+<span class="fc" id="L113">            .size(page.getSize())</span>
+<span class="fc" id="L114">            .totalElements(page.getTotalElements())</span>
+<span class="fc" id="L115">            .totalPages(page.getTotalPages())</span>
+<span class="fc" id="L116">            .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

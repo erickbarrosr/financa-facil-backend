@@ -31,10 +31,40 @@ class CategoryUseCaseImplTest {
     }
 
     @Test
-    void findAll_filtersByType_whenProvided() {
+    void create_savesWithGeneratedId() {
+        var cat = buildCategory();
+        when(categoryRepository.save(any())).thenReturn(cat);
+
+        categoryUseCase.create(userId, "Food", "expense", "star", "#FF0000");
+
+        var captor = ArgumentCaptor.forClass(Category.class);
+        verify(categoryRepository).save(captor.capture());
+        assertThat(captor.getValue().getName()).isEqualTo("Food");
+        assertThat(captor.getValue().getType()).isEqualTo("expense");
+        assertThat(captor.getValue().getId()).isNotNull();
+    }
+
+    @Test
+    void update_throwsNotFound_whenCategoryNotFound() {
+        var catId = UUID.randomUUID();
+        when(categoryRepository.findById(catId, userId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> categoryUseCase.update(userId, catId, "New Name", "star", "#FF0000"))
+            .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    void findAll_filtersByType_returnsResult() {
         var cat = buildCategory();
         when(categoryRepository.findAllByUserIdAndType(userId, "expense")).thenReturn(List.of(cat));
-        categoryUseCase.findAll(userId, "expense");
+        when(presentationMapper.toResponse(cat)).thenReturn(
+            com.financafacil.presentation.dto.response.CategoryResponse.builder()
+                .id(cat.getId()).name(cat.getName()).type(cat.getType())
+                .icon(cat.getIcon()).color(cat.getColor()).build());
+
+        var result = categoryUseCase.findAll(userId, "expense");
+
+        assertThat(result).hasSize(1);
         verify(categoryRepository).findAllByUserIdAndType(userId, "expense");
         verify(categoryRepository, never()).findAllByUserId(any());
     }

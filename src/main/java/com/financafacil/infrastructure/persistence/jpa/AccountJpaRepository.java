@@ -23,6 +23,10 @@ public interface AccountJpaRepository extends JpaRepository<AccountJpaEntity, UU
     @Query("UPDATE AccountJpaEntity a SET a.balance = :balance WHERE a.id = :accountId")
     void updateBalance(@Param("accountId") UUID accountId, @Param("balance") BigDecimal balance);
 
+    @Modifying
+    @Query("UPDATE AccountJpaEntity a SET a.balance = a.balance + :delta WHERE a.id = :accountId")
+    void adjustBalance(@Param("accountId") UUID accountId, @Param("delta") BigDecimal delta);
+
     @Query(value = "SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END FROM transactions WHERE account_id = :accountId", nativeQuery = true)
     boolean hasTransactions(@Param("accountId") UUID accountId);
 }

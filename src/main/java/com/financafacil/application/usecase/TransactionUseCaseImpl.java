@@ -30,8 +30,10 @@ public class TransactionUseCaseImpl implements TransactionUseCase {
     @Transactional
     public TransactionResponse create(UUID userId, UUID accountId, UUID categoryId, String type,
                                       BigDecimal amount, String description, LocalDate transactionDate, String status) {
-        var account = accountRepository.findById(accountId, userId)
-            .orElseThrow(() -> new NotFoundException("Conta não encontrada"));
+        // Validate account ownership
+        if (!accountRepository.existsByIdAndUserId(accountId, userId)) {
+            throw new NotFoundException("Conta não encontrada");
+        }
 
         var transaction = transactionRepository.save(Transaction.builder()
             .id(UUID.randomUUID())
@@ -47,8 +49,9 @@ public class TransactionUseCaseImpl implements TransactionUseCase {
             .updatedAt(Instant.now())
             .build());
 
+        // Atomic incremental balance update — avoids lost-update race condition
         var delta = "income".equals(type) ? amount : amount.negate();
-        accountRepository.updateBalance(accountId, account.getBalance().add(delta));
+        accountRepository.adjustBalance(accountId, delta);
 
         return presentationMapper.toResponse(transaction);
     }
@@ -60,14 +63,21 @@ public class TransactionUseCaseImpl implements TransactionUseCase {
                                       LocalDate transactionDate, String status) {
         var existing = transactionRepository.findById(transactionId, userId)
             .orElseThrow(() -> new NotFoundException("Transação não encontrada"));
-        var account = accountRepository.findById(existing.getAccountId(), userId)
-            .orElseThrow(() -> new NotFoundException("Conta não encontrada"));
 
-        // Revert old balance effect
-        var oldDelta = "income".equals(existing.getType()) ? existing.getAmount().negate() : existing.getAmount();
-        // Apply new balance effect
+        // Revert balance effect of the original transaction on the original account
+        var revertDelta = "income".equals(existing.getType()) ? existing.getAmount().negate() : existing.getAmount();
+        accountRepository.adjustBalance(existing.getAccountId(), revertDelta);
+
+        // If account changed, validate that the new account belongs to the user
+        if (!accountId.equals(existing.getAccountId())) {
+            if (!accountRepository.existsByIdAndUserId(accountId, userId)) {
+                throw new NotFoundException("Conta de destino não encontrada");
+            }
+        }
+
+        // Apply new balance effect on the (potentially new) account
         var newDelta = "income".equals(type) ? amount : amount.negate();
-        accountRepository.updateBalance(existing.getAccountId(), account.getBalance().add(oldDelta).add(newDelta));
+        accountRepository.adjustBalance(accountId, newDelta);
 
         var updated = transactionRepository.save(existing
             .withAccountId(accountId)
@@ -87,11 +97,10 @@ public class TransactionUseCaseImpl implements TransactionUseCase {
     public void delete(UUID userId, UUID transactionId) {
         var tx = transactionRepository.findById(transactionId, userId)
             .orElseThrow(() -> new NotFoundException("Transação não encontrada"));
-        var account = accountRepository.findById(tx.getAccountId(), userId)
-            .orElseThrow(() -> new NotFoundException("Conta não encontrada"));
 
+        // Revert the balance effect atomically before deleting
         var revertDelta = "income".equals(tx.getType()) ? tx.getAmount().negate() : tx.getAmount();
-        accountRepository.updateBalance(tx.getAccountId(), account.getBalance().add(revertDelta));
+        accountRepository.adjustBalance(tx.getAccountId(), revertDelta);
         transactionRepository.deleteById(transactionId, userId);
     }
 

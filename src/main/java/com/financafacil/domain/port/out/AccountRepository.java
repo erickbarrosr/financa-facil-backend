@@ -12,6 +12,7 @@ public interface AccountRepository {
     List<Account> findAllByUserId(UUID userId);
     void deleteById(UUID id, UUID userId);
     void updateBalance(UUID accountId, BigDecimal newBalance);
+    void adjustBalance(UUID accountId, BigDecimal delta);
     boolean existsByIdAndUserId(UUID id, UUID userId);
     boolean hasTransactions(UUID accountId);
 }

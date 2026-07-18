@@ -49,6 +49,12 @@ public class AccountRepositoryAdapter implements AccountRepository {
     }
 
     @Override
+    @Transactional
+    public void adjustBalance(UUID accountId, BigDecimal delta) {
+        jpaRepository.adjustBalance(accountId, delta);
+    }
+
+    @Override
     public boolean existsByIdAndUserId(UUID id, UUID userId) {
         return jpaRepository.existsByIdAndUserId(id, userId);
     }

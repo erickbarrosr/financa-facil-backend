@@ -37,8 +37,9 @@ public class AccountRepositoryAdapter implements AccountRepository {
     }
 
     @Override
+    @Transactional
     public void deleteById(UUID id, UUID userId) {
-        jpaRepository.findByIdAndUserId(id, userId).ifPresent(jpaRepository::delete);
+        jpaRepository.deleteByIdAndUserId(id, userId);
     }
 
     @Override

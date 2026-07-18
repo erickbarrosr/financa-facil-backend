@@ -4,6 +4,7 @@ import com.financafacil.infrastructure.persistence.entity.AccountJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -15,9 +16,13 @@ public interface AccountJpaRepository extends JpaRepository<AccountJpaEntity, UU
     boolean existsByIdAndUserId(UUID id, UUID userId);
 
     @Modifying
-    @Query("UPDATE AccountJpaEntity a SET a.balance = :balance WHERE a.id = :accountId")
-    void updateBalance(UUID accountId, BigDecimal balance);
+    @Query("DELETE FROM AccountJpaEntity a WHERE a.id = :id AND a.userId = :userId")
+    void deleteByIdAndUserId(@Param("id") UUID id, @Param("userId") UUID userId);
 
-    @Query(value = "SELECT COUNT(*) > 0 FROM transactions t WHERE t.account_id = :accountId", nativeQuery = true)
-    boolean hasTransactions(UUID accountId);
+    @Modifying
+    @Query("UPDATE AccountJpaEntity a SET a.balance = :balance WHERE a.id = :accountId")
+    void updateBalance(@Param("accountId") UUID accountId, @Param("balance") BigDecimal balance);
+
+    @Query(value = "SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END FROM transactions WHERE account_id = :accountId", nativeQuery = true)
+    boolean hasTransactions(@Param("accountId") UUID accountId);
 }

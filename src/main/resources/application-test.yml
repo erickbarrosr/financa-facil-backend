@@ -7,6 +7,9 @@ spring:
       ddl-auto: validate
   flyway:
     enabled: true
+  mail:
+    host: localhost
+    port: 25
 
 app:
   jwt:
@@ -20,7 +23,3 @@ app:
     from: test@test.com
   frontend:
     url: http://localhost:5173
-
-spring.mail:
-  host: localhost
-  port: 25

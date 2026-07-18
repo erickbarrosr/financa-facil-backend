@@ -1,0 +1,13 @@
+.gradle/
+build/
+.env
+.env.development
+.env.test
+.env.production
+*.class
+*.jar
+!gradle-wrapper.jar
+.idea/
+*.iml
+*.iws
+.DS_Store

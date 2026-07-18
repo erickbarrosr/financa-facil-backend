@@ -13,3 +13,6 @@ CREATE INDEX idx_refresh_tokens_user_id ON refresh_tokens(user_id);
 CREATE INDEX idx_refresh_tokens_expires ON refresh_tokens(expires_at) WHERE NOT revoked;
 CREATE INDEX idx_audit_logs_user_id ON audit_logs(user_id);
 CREATE INDEX idx_audit_logs_created_at ON audit_logs(created_at);
+CREATE INDEX idx_refresh_tokens_hash ON refresh_tokens(token_hash);
+CREATE INDEX idx_pwd_reset_tokens_hash ON password_reset_tokens(token_hash);
+CREATE INDEX idx_email_verif_tokens_hash ON email_verification_tokens(token_hash);

@@ -55,6 +55,9 @@ dependencies {
     annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
     annotationProcessor("org.projectlombok:lombok-mapstruct-binding:$lombokMapstructBindingVersion")
 
+    // Hypersistence Utils (JSONB support)
+    implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.8.3")
+
     // OpenAPI
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocVersion")
 

@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface RefreshTokenJpaRepository extends JpaRepository<RefreshTokenJpaEntity, UUID> {
     Optional<RefreshTokenJpaEntity> findByTokenHash(String tokenHash);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE RefreshTokenJpaEntity r SET r.revoked = true WHERE r.userId = :userId")
     void revokeAllByUserId(UUID userId);
 }

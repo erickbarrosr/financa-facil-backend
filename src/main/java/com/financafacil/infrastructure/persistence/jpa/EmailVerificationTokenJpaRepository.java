@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface EmailVerificationTokenJpaRepository extends JpaRepository<EmailVerificationTokenJpaEntity, UUID> {
     Optional<EmailVerificationTokenJpaEntity> findByTokenHash(String tokenHash);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE EmailVerificationTokenJpaEntity t SET t.used = true WHERE t.id = :id")
     void markAsUsed(UUID id);
 }

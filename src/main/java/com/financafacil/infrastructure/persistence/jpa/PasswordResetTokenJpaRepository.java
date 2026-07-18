@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface PasswordResetTokenJpaRepository extends JpaRepository<PasswordResetTokenJpaEntity, UUID> {
     Optional<PasswordResetTokenJpaEntity> findByTokenHash(String tokenHash);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE PasswordResetTokenJpaEntity t SET t.used = true WHERE t.id = :id")
     void markAsUsed(UUID id);
 }

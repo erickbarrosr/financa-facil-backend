@@ -5,6 +5,7 @@ import com.financafacil.infrastructure.persistence.entity.RefreshTokenJpaEntity;
 import com.financafacil.infrastructure.persistence.jpa.RefreshTokenJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,6 +28,18 @@ public class RefreshTokenRepositoryAdapter implements RefreshTokenRepository {
             .map(e -> new RefreshTokenData(e.getId(), e.getUserId(), e.getExpiresAt(), e.isRevoked()));
     }
 
-    @Override public void revokeAllByUserId(UUID userId) { jpaRepository.revokeAllByUserId(userId); }
-    @Override public void revokeById(UUID id) { jpaRepository.findById(id).ifPresent(e -> { e.setRevoked(true); jpaRepository.save(e); }); }
+    @Override
+    @Transactional
+    public void revokeAllByUserId(UUID userId) {
+        jpaRepository.revokeAllByUserId(userId);
+    }
+
+    @Override
+    @Transactional
+    public void revokeById(UUID id) {
+        jpaRepository.findById(id).ifPresent(e -> {
+            e.setRevoked(true);
+            jpaRepository.save(e);
+        });
+    }
 }

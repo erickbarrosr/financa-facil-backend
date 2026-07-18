@@ -11,6 +11,11 @@ spring:
     host: localhost
     port: 25
 
+management:
+  health:
+    mail:
+      enabled: false
+
 app:
   jwt:
     access-secret: test-access-secret-must-be-at-least-256-bits-long-for-hs256

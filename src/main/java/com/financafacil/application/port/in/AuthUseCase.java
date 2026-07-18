@@ -1,4 +1,4 @@
-package com.financafacil.domain.port.in;
+package com.financafacil.application.port.in;
 
 import com.financafacil.application.dto.AuthResponse;
 import com.financafacil.application.dto.UserResponse;

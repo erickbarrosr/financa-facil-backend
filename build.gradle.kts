@@ -29,8 +29,7 @@ val testcontainersVersion = "1.21.3"
 val restAssuredVersion = "5.5.0"
 val springdocVersion = "2.6.0"
 
-// Override Spring Boot BOM's Testcontainers version (1.19.8) with 1.20.4
-// 1.19.8 uses Docker API 1.32 which is rejected by Docker daemons requiring 1.44+
+// Override Spring Boot BOM's Testcontainers version with 1.21.3 (required for Docker API 1.44+)
 dependencyManagement {
     imports {
         mavenBom("org.testcontainers:testcontainers-bom:$testcontainersVersion")
@@ -83,44 +82,8 @@ dependencies {
     testAnnotationProcessor("org.projectlombok:lombok")
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Docker API version proxy
-//
-// Docker 29.x enforces a minimum API version of 1.44, but Testcontainers' shaded
-// docker-java library hard-codes "v1.32" in every HTTP request URL (e.g.
-// /v1.32/containers/create). Docker rejects those requests with HTTP 400.
-//
-// Workaround: a lightweight Python proxy (config/docker-proxy.py) listens on a
-// Unix socket at /tmp/docker-proxy.sock and rewrites every "/v1.XX/" URL
-// segment to "/v1.44/" before forwarding to /var/run/docker.sock.
-//
-// The proxy is started automatically before the test task and terminated after.
-// DOCKER_HOST points Testcontainers to the proxy socket.
-// TESTCONTAINERS_RYUK_DISABLED=true keeps the reaper off the proxy path.
-// ──────────────────────────────────────────────────────────────────────────────
-var dockerProxyProcess: Process? = null
-
 tasks.withType<Test> {
     useJUnitPlatform()
-    environment("DOCKER_HOST", "unix:///tmp/docker-proxy.sock")
-    environment("TESTCONTAINERS_RYUK_DISABLED", "true")
-
-    doFirst {
-        val proxySocket = file("/tmp/docker-proxy.sock")
-        if (proxySocket.exists()) proxySocket.delete()
-        val proxyScript = file("config/docker-proxy.py")
-        dockerProxyProcess = ProcessBuilder("python3", proxyScript.absolutePath)
-            .redirectOutput(file("/tmp/docker-proxy.log"))
-            .redirectErrorStream(true)
-            .start()
-        // Give the proxy a moment to bind the socket
-        Thread.sleep(600)
-    }
-
-    doLast {
-        dockerProxyProcess?.destroy()
-        file("/tmp/docker-proxy.sock").delete()
-    }
 }
 
 tasks.jacocoTestReport {

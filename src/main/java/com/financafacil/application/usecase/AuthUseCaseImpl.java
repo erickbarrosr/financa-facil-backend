@@ -6,7 +6,7 @@ import com.financafacil.domain.exception.ConflictException;
 import com.financafacil.domain.exception.NotFoundException;
 import com.financafacil.domain.exception.UnauthorizedException;
 import com.financafacil.domain.model.User;
-import com.financafacil.domain.port.in.AuthUseCase;
+import com.financafacil.application.port.in.AuthUseCase;
 import com.financafacil.domain.port.out.*;
 import com.financafacil.infrastructure.config.AppProperties;
 import com.financafacil.infrastructure.security.jwt.JwtService;
@@ -92,6 +92,7 @@ public class AuthUseCaseImpl implements AuthUseCase {
     }
 
     @Override
+    @Transactional
     public void forgotPassword(String email) {
         userRepository.findByEmail(email).ifPresent(user -> {
             var rawToken = UUID.randomUUID().toString();

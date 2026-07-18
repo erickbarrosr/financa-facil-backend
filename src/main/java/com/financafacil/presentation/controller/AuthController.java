@@ -2,7 +2,7 @@ package com.financafacil.presentation.controller;
 
 import com.financafacil.application.dto.AuthResponse;
 import com.financafacil.application.dto.UserResponse;
-import com.financafacil.domain.port.in.AuthUseCase;
+import com.financafacil.application.port.in.AuthUseCase;
 import com.financafacil.presentation.dto.request.*;
 import com.financafacil.presentation.dto.response.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -33,14 +32,14 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ApiResponse<AuthResponse> refresh(@RequestBody Map<String, String> body) {
-        return ApiResponse.ok(authUseCase.refresh(body.get("refreshToken")));
+    public ApiResponse<AuthResponse> refresh(@Valid @RequestBody RefreshRequest req) {
+        return ApiResponse.ok(authUseCase.refresh(req.getRefreshToken()));
     }
 
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void logout(@RequestBody Map<String, String> body) {
-        authUseCase.logout(body.get("refreshToken"));
+    public void logout(@Valid @RequestBody LogoutRequest req) {
+        authUseCase.logout(req.getRefreshToken());
     }
 
     @PostMapping("/forgot-password")

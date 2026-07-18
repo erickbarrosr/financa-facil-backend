@@ -18,6 +18,12 @@ import static org.hamcrest.Matchers.*;
 @Testcontainers
 class AuthControllerIntegrationTest {
 
+    static {
+        System.setProperty("TESTCONTAINERS_RYUK_DISABLED", "true");
+        System.setProperty("DOCKER_HOST", "unix:///var/run/docker.sock");
+        System.setProperty("api.version", "1.44");
+    }
+
     @LocalServerPort int port;
 
     @MockBean

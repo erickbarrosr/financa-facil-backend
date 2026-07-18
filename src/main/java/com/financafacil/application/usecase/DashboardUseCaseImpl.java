@@ -12,6 +12,7 @@ import com.financafacil.presentation.dto.response.TransactionResponse;
 import com.financafacil.presentation.mapper.TransactionPresentationMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class DashboardUseCaseImpl implements DashboardUseCase {
 
     private final TransactionRepository transactionRepository;
@@ -127,9 +129,8 @@ public class DashboardUseCaseImpl implements DashboardUseCase {
 
     @Override
     public List<TransactionResponse> getRecentTransactions(UUID userId, int limit) {
-        var start = LocalDate.now().minusMonths(3);
+        var start = LocalDate.now().minusMonths(36);
         var end = LocalDate.now();
-
         return transactionRepository.findByUserIdAndDateBetween(userId, start, end)
             .stream()
             .sorted(Comparator.comparing(Transaction::getTransactionDate).reversed())

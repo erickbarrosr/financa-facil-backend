@@ -95,4 +95,124 @@ class AuthUseCaseImplTest {
         assertThatCode(() -> authUseCase.forgotPassword("ghost@test.com")).doesNotThrowAnyException();
         verify(emailService, never()).sendPasswordReset(any(), any());
     }
+
+    @Test
+    void login_returnsAuthResponse_whenCredentialsValid() {
+        var userId = UUID.randomUUID();
+        var encodedPassword = passwordEncoder.encode("password123");
+        var user = User.builder().id(userId).name("Test").email("user@test.com")
+            .passwordHash(encodedPassword).active(true).emailVerified(true)
+            .createdAt(Instant.now()).updatedAt(Instant.now()).build();
+        when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
+
+        var result = authUseCase.login("user@test.com", "password123", "127.0.0.1", "agent");
+
+        assertThat(result.getAccessToken()).isNotBlank();
+        assertThat(result.getRefreshToken()).isNotBlank();
+        verify(auditLogRepository).log(eq(userId), eq("LOGIN"), any(), any(), any(), eq("127.0.0.1"), eq("agent"));
+    }
+
+    @Test
+    void login_throwsUnauthorized_whenUserInactive() {
+        var user = User.builder().id(UUID.randomUUID()).email("inactive@test.com")
+            .passwordHash(passwordEncoder.encode("pass")).active(false)
+            .emailVerified(true).createdAt(Instant.now()).updatedAt(Instant.now()).build();
+        when(userRepository.findByEmail("inactive@test.com")).thenReturn(Optional.of(user));
+        assertThatThrownBy(() -> authUseCase.login("inactive@test.com", "pass", null, null))
+            .isInstanceOf(UnauthorizedException.class);
+    }
+
+    @Test
+    void refresh_throwsUnauthorized_whenTokenNotFound() {
+        when(refreshTokenRepository.findByTokenHash(any())).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> authUseCase.refresh("invalid-token"))
+            .isInstanceOf(UnauthorizedException.class);
+    }
+
+    @Test
+    void refresh_throwsUnauthorized_whenTokenRevoked() {
+        var tokenData = new com.financafacil.domain.port.out.RefreshTokenRepository.RefreshTokenData(
+            UUID.randomUUID(), UUID.randomUUID(), Instant.now().plusSeconds(3600), true);
+        when(refreshTokenRepository.findByTokenHash(any())).thenReturn(Optional.of(tokenData));
+        assertThatThrownBy(() -> authUseCase.refresh("revoked-token"))
+            .isInstanceOf(UnauthorizedException.class);
+    }
+
+    @Test
+    void refresh_throwsUnauthorized_whenTokenExpired() {
+        var tokenData = new com.financafacil.domain.port.out.RefreshTokenRepository.RefreshTokenData(
+            UUID.randomUUID(), UUID.randomUUID(), Instant.now().minusSeconds(1), false);
+        when(refreshTokenRepository.findByTokenHash(any())).thenReturn(Optional.of(tokenData));
+        assertThatThrownBy(() -> authUseCase.refresh("expired-token"))
+            .isInstanceOf(UnauthorizedException.class);
+    }
+
+    @Test
+    void logout_revokesToken_whenFound() {
+        var tokenData = new com.financafacil.domain.port.out.RefreshTokenRepository.RefreshTokenData(
+            UUID.randomUUID(), UUID.randomUUID(), Instant.now().plusSeconds(3600), false);
+        when(refreshTokenRepository.findByTokenHash(any())).thenReturn(Optional.of(tokenData));
+        assertThatCode(() -> authUseCase.logout("valid-token")).doesNotThrowAnyException();
+        verify(refreshTokenRepository).revokeById(tokenData.id());
+    }
+
+    @Test
+    void logout_doesNotThrow_whenTokenNotFound() {
+        when(refreshTokenRepository.findByTokenHash(any())).thenReturn(Optional.empty());
+        assertThatCode(() -> authUseCase.logout("unknown-token")).doesNotThrowAnyException();
+    }
+
+    @Test
+    void resetPassword_throwsUnauthorized_whenTokenNotFound() {
+        when(passwordResetTokenRepository.findByTokenHash(any())).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> authUseCase.resetPassword("bad-token", "newpass"))
+            .isInstanceOf(UnauthorizedException.class);
+    }
+
+    @Test
+    void resetPassword_throwsUnauthorized_whenTokenAlreadyUsed() {
+        var tokenData = new com.financafacil.domain.port.out.PasswordResetTokenRepository.TokenData(
+            UUID.randomUUID(), UUID.randomUUID(), Instant.now().plusSeconds(3600), true);
+        when(passwordResetTokenRepository.findByTokenHash(any())).thenReturn(Optional.of(tokenData));
+        assertThatThrownBy(() -> authUseCase.resetPassword("used-token", "newpass"))
+            .isInstanceOf(UnauthorizedException.class);
+    }
+
+    @Test
+    void verifyEmail_throwsUnauthorized_whenTokenExpired() {
+        var tokenData = new com.financafacil.domain.port.out.EmailVerificationTokenRepository.TokenData(
+            UUID.randomUUID(), UUID.randomUUID(), Instant.now().minusSeconds(1), false);
+        when(emailVerificationTokenRepository.findByTokenHash(any())).thenReturn(Optional.of(tokenData));
+        assertThatThrownBy(() -> authUseCase.verifyEmail("expired-token"))
+            .isInstanceOf(UnauthorizedException.class);
+    }
+
+    @Test
+    void me_returnsUserResponse_whenUserFound() {
+        var userId = UUID.randomUUID();
+        var user = User.builder().id(userId).name("Test User").email("me@test.com")
+            .emailVerified(true).active(true).createdAt(Instant.now()).updatedAt(Instant.now()).build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        var result = authUseCase.me(userId);
+        assertThat(result.getEmail()).isEqualTo("me@test.com");
+        assertThat(result.isEmailVerified()).isTrue();
+    }
+
+    @Test
+    void me_throwsNotFound_whenUserDoesNotExist() {
+        var userId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> authUseCase.me(userId))
+            .isInstanceOf(com.financafacil.domain.exception.NotFoundException.class);
+    }
+
+    @Test
+    void forgotPassword_sendsEmail_whenUserExists() {
+        var user = User.builder().id(UUID.randomUUID()).email("existing@test.com")
+            .active(true).emailVerified(true).createdAt(Instant.now()).updatedAt(Instant.now()).build();
+        when(userRepository.findByEmail("existing@test.com")).thenReturn(Optional.of(user));
+        authUseCase.forgotPassword("existing@test.com");
+        verify(passwordResetTokenRepository).save(any(), eq(user.getId()), any(), any());
+        verify(emailService).sendPasswordReset(eq("existing@test.com"), any());
+    }
 }

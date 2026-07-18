@@ -146,9 +146,7 @@ public class AuthUseCaseImpl implements AuthUseCase {
         var rawRefresh = jwtService.generateRefreshToken();
         refreshTokenRepository.save(UUID.randomUUID(), user.getId(), hashToken(rawRefresh),
             Instant.now().plusMillis(appProperties.getJwt().getRefreshExpirationMs()));
-        return AuthResponse.of(accessToken,
-            appProperties.getJwt().getAccessExpirationMs() / 1000,
-            toUserResponse(user));
+        return AuthResponse.of(accessToken, rawRefresh, appProperties.getJwt().getAccessExpirationMs() / 1000, toUserResponse(user));
     }
 
     private void issueEmailVerificationToken(User user) {

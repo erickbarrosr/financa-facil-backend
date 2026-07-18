@@ -2,6 +2,7 @@ package com.financafacil.application.usecase;
 
 import com.financafacil.domain.exception.NotFoundException;
 import com.financafacil.domain.model.RecurringTransaction;
+import com.financafacil.domain.port.out.AccountRepository;
 import com.financafacil.domain.port.out.RecurringTransactionRepository;
 import com.financafacil.presentation.dto.response.RecurringTransactionResponse;
 import com.financafacil.presentation.mapper.RecurringTransactionPresentationMapper;
@@ -23,6 +24,7 @@ class RecurringTransactionUseCaseImplTest {
 
     @Mock RecurringTransactionRepository recurringTransactionRepository;
     @Mock RecurringTransactionPresentationMapper presentationMapper;
+    @Mock AccountRepository accountRepository;
     @InjectMocks RecurringTransactionUseCaseImpl recurringTransactionUseCase;
 
     private final UUID userId = UUID.randomUUID();
@@ -31,6 +33,7 @@ class RecurringTransactionUseCaseImplTest {
     @Test
     void create_savesRecurringTransaction() {
         var rt = buildRecurring(true);
+        when(accountRepository.existsByIdAndUserId(accountId, userId)).thenReturn(true);
         when(recurringTransactionRepository.save(any())).thenReturn(rt);
         when(presentationMapper.toResponse(rt)).thenReturn(buildResponse(rt));
 
@@ -94,6 +97,15 @@ class RecurringTransactionUseCaseImplTest {
         when(recurringTransactionRepository.findById(id, userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> recurringTransactionUseCase.toggleActive(userId, id))
+            .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    void create_throwsNotFound_whenAccountNotBelongsToUser() {
+        when(accountRepository.existsByIdAndUserId(any(), eq(userId))).thenReturn(false);
+        assertThatThrownBy(() -> recurringTransactionUseCase.create(
+            userId, UUID.randomUUID(), null, BigDecimal.valueOf(100), "expense", "monthly",
+            java.time.LocalDate.now()))
             .isInstanceOf(NotFoundException.class);
     }
 

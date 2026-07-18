@@ -4,6 +4,7 @@ import com.financafacil.domain.exception.ConflictException;
 import com.financafacil.domain.exception.NotFoundException;
 import com.financafacil.domain.model.Budget;
 import com.financafacil.domain.port.out.BudgetRepository;
+import com.financafacil.domain.port.out.CategoryRepository;
 import com.financafacil.presentation.dto.response.BudgetResponse;
 import com.financafacil.presentation.mapper.BudgetPresentationMapper;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,7 @@ class BudgetUseCaseImplTest {
 
     @Mock BudgetRepository budgetRepository;
     @Mock BudgetPresentationMapper presentationMapper;
+    @Mock CategoryRepository categoryRepository;
     @InjectMocks BudgetUseCaseImpl budgetUseCase;
 
     private final UUID userId = UUID.randomUUID();
@@ -31,6 +33,7 @@ class BudgetUseCaseImplTest {
     void create_savesBudget() {
         var categoryId = UUID.randomUUID();
         var budget = buildBudget(categoryId);
+        when(categoryRepository.existsByIdAndUserId(categoryId, userId)).thenReturn(true);
         when(budgetRepository.existsByUserIdAndCategoryIdAndMonthAndYear(userId, categoryId, 1, 2024)).thenReturn(false);
         when(budgetRepository.save(any())).thenReturn(budget);
         when(presentationMapper.toResponse(budget)).thenReturn(buildResponse(budget));
@@ -45,10 +48,19 @@ class BudgetUseCaseImplTest {
     @Test
     void create_throwsConflict_whenDuplicateBudget() {
         var categoryId = UUID.randomUUID();
+        when(categoryRepository.existsByIdAndUserId(categoryId, userId)).thenReturn(true);
         when(budgetRepository.existsByUserIdAndCategoryIdAndMonthAndYear(userId, categoryId, 1, 2024)).thenReturn(true);
 
         assertThatThrownBy(() -> budgetUseCase.create(userId, categoryId, BigDecimal.valueOf(500), 1, 2024))
             .isInstanceOf(ConflictException.class);
+    }
+
+    @Test
+    void create_throwsNotFound_whenCategoryNotBelongsToUser() {
+        when(categoryRepository.existsByIdAndUserId(any(), eq(userId))).thenReturn(false);
+        assertThatThrownBy(() -> budgetUseCase.create(userId, UUID.randomUUID(),
+            BigDecimal.valueOf(1000), 7, 2026))
+            .isInstanceOf(NotFoundException.class);
     }
 
     @Test

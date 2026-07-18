@@ -5,6 +5,7 @@ import com.financafacil.domain.exception.NotFoundException;
 import com.financafacil.domain.model.Budget;
 import com.financafacil.domain.port.in.BudgetUseCase;
 import com.financafacil.domain.port.out.BudgetRepository;
+import com.financafacil.domain.port.out.CategoryRepository;
 import com.financafacil.presentation.dto.response.BudgetResponse;
 import com.financafacil.presentation.mapper.BudgetPresentationMapper;
 import lombok.RequiredArgsConstructor;
@@ -22,10 +23,14 @@ import java.util.stream.Collectors;
 public class BudgetUseCaseImpl implements BudgetUseCase {
     private final BudgetRepository budgetRepository;
     private final BudgetPresentationMapper presentationMapper;
+    private final CategoryRepository categoryRepository;
 
     @Override
     @Transactional
     public BudgetResponse create(UUID userId, UUID categoryId, BigDecimal amount, int month, int year) {
+        if (!categoryRepository.existsByIdAndUserId(categoryId, userId)) {
+            throw new NotFoundException("Categoria não encontrada");
+        }
         if (budgetRepository.existsByUserIdAndCategoryIdAndMonthAndYear(userId, categoryId, month, year)) {
             throw new ConflictException("Já existe um orçamento para esta categoria neste mês/ano");
         }

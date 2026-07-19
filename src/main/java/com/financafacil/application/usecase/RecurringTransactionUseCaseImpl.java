@@ -65,12 +65,12 @@ public class RecurringTransactionUseCaseImpl implements RecurringTransactionUseC
             .orElseThrow(() -> new NotFoundException("Transação recorrente não encontrada"));
 
         var candidate = existing;
-        if (accountId != null) candidate = candidate.withAccountId(accountId);
-        if (categoryId != null) candidate = candidate.withCategoryId(categoryId);
-        if (amount != null) candidate = candidate.withAmount(amount);
-        if (type != null) candidate = candidate.withType(type);
-        if (frequency != null) candidate = candidate.withFrequency(frequency);
-        if (nextExecution != null) candidate = candidate.withNextExecution(nextExecution);
+        if (accountId != null) { candidate = candidate.withAccountId(accountId); }
+        if (categoryId != null) { candidate = candidate.withCategoryId(categoryId); }
+        if (amount != null) { candidate = candidate.withAmount(amount); }
+        if (type != null) { candidate = candidate.withType(type); }
+        if (frequency != null) { candidate = candidate.withFrequency(frequency); }
+        if (nextExecution != null) { candidate = candidate.withNextExecution(nextExecution); }
         candidate = candidate.withUpdatedAt(Instant.now());
 
         var updated = recurringTransactionRepository.save(candidate);

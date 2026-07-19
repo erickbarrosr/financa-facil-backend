@@ -1,6 +1,6 @@
 package com.financafacil.presentation.dto.request;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data

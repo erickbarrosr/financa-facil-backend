@@ -3,14 +3,25 @@ package com.financafacil.presentation.controller;
 import com.financafacil.application.dto.AuthResponse;
 import com.financafacil.application.dto.UserResponse;
 import com.financafacil.application.port.in.AuthUseCase;
-import com.financafacil.presentation.dto.request.*;
+import com.financafacil.presentation.dto.request.ForgotPasswordRequest;
+import com.financafacil.presentation.dto.request.LoginRequest;
+import com.financafacil.presentation.dto.request.LogoutRequest;
+import com.financafacil.presentation.dto.request.RefreshRequest;
+import com.financafacil.presentation.dto.request.RegisterRequest;
+import com.financafacil.presentation.dto.request.ResetPasswordRequest;
+import com.financafacil.presentation.dto.request.VerifyEmailRequest;
 import com.financafacil.presentation.dto.response.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController

@@ -1,9 +1,8 @@
 # ---- Stage 1: Build ----
-FROM eclipse-temurin:21-jdk-alpine AS builder
+FROM maven:3-eclipse-temurin-21-alpine AS builder
 WORKDIR /app
 COPY pom.xml ./
-RUN apk add --no-cache maven && \
-    mvn dependency:go-offline --no-transfer-progress 2>/dev/null || true
+RUN mvn dependency:go-offline --no-transfer-progress 2>/dev/null || true
 COPY src/ src/
 RUN mvn package -DskipTests --no-transfer-progress
 

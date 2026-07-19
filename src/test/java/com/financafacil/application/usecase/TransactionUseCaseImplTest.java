@@ -4,6 +4,7 @@ import com.financafacil.domain.exception.NotFoundException;
 import com.financafacil.domain.model.Account;
 import com.financafacil.domain.model.Transaction;
 import com.financafacil.domain.port.out.AccountRepository;
+import com.financafacil.domain.port.out.CategoryRepository;
 import com.financafacil.domain.port.out.TransactionRepository;
 import com.financafacil.presentation.mapper.TransactionPresentationMapper;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,7 @@ import static org.mockito.Mockito.*;
 class TransactionUseCaseImplTest {
     @Mock TransactionRepository transactionRepository;
     @Mock AccountRepository accountRepository;
+    @Mock CategoryRepository categoryRepository;
     @Mock TransactionPresentationMapper presentationMapper;
     @InjectMocks TransactionUseCaseImpl transactionUseCase;
 
@@ -62,6 +64,34 @@ class TransactionUseCaseImplTest {
         assertThatThrownBy(() -> transactionUseCase.create(userId, accountId, null, "expense",
             BigDecimal.valueOf(100), null, LocalDate.now(), "PAID"))
             .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    void create_throwsNotFound_whenCategoryNotBelongsToUser() {
+        var accountId = UUID.randomUUID();
+        var categoryId = UUID.randomUUID();
+        when(accountRepository.existsByIdAndUserId(accountId, userId)).thenReturn(true);
+        when(categoryRepository.existsByIdAndUserId(categoryId, userId)).thenReturn(false);
+
+        assertThatThrownBy(() -> transactionUseCase.create(userId, accountId, categoryId, "expense",
+            BigDecimal.valueOf(100), null, LocalDate.now(), "PAID"))
+            .isInstanceOf(NotFoundException.class)
+            .hasMessageContaining("Categoria");
+    }
+
+    @Test
+    void update_throwsNotFound_whenCategoryNotBelongsToUser() {
+        var accountId = UUID.randomUUID();
+        var categoryId = UUID.randomUUID();
+        var txId = UUID.randomUUID();
+        var existing = buildTransactionWithId(txId, accountId, "income", BigDecimal.valueOf(100));
+        when(transactionRepository.findById(txId, userId)).thenReturn(Optional.of(existing));
+        when(categoryRepository.existsByIdAndUserId(categoryId, userId)).thenReturn(false);
+
+        assertThatThrownBy(() -> transactionUseCase.update(userId, txId, accountId, categoryId, "income",
+            BigDecimal.valueOf(100), null, LocalDate.now(), "PAID"))
+            .isInstanceOf(NotFoundException.class)
+            .hasMessageContaining("Categoria");
     }
 
     @Test

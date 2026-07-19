@@ -54,6 +54,30 @@ class AccountUseCaseImplTest {
     }
 
     @Test
+    void delete_throwsConflict_whenAccountHasTransfers() {
+        var accountId = UUID.randomUUID();
+        when(accountRepository.existsByIdAndUserId(accountId, userId)).thenReturn(true);
+        when(accountRepository.hasTransactions(accountId)).thenReturn(false);
+        when(accountRepository.hasTransfers(accountId)).thenReturn(true);
+
+        assertThatThrownBy(() -> accountUseCase.delete(userId, accountId))
+            .isInstanceOf(ConflictException.class)
+            .hasMessageContaining("transferências");
+    }
+
+    @Test
+    void delete_succeeds_whenAccountHasNoTransactionsOrTransfers() {
+        var accountId = UUID.randomUUID();
+        when(accountRepository.existsByIdAndUserId(accountId, userId)).thenReturn(true);
+        when(accountRepository.hasTransactions(accountId)).thenReturn(false);
+        when(accountRepository.hasTransfers(accountId)).thenReturn(false);
+
+        accountUseCase.delete(userId, accountId);
+
+        verify(accountRepository).deleteById(accountId, userId);
+    }
+
+    @Test
     void delete_throwsNotFound_whenAccountBelongsToOtherUser() {
         var accountId = UUID.randomUUID();
         when(accountRepository.existsByIdAndUserId(accountId, userId)).thenReturn(false);

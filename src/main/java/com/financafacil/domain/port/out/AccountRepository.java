@@ -15,4 +15,5 @@ public interface AccountRepository {
     void adjustBalance(UUID accountId, BigDecimal delta);
     boolean existsByIdAndUserId(UUID id, UUID userId);
     boolean hasTransactions(UUID accountId);
+    boolean hasTransfers(UUID accountId);
 }

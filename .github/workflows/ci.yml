@@ -9,11 +9,6 @@ jobs:
     name: Build, Test & Quality
     runs-on: ubuntu-latest
 
-    services:
-      docker:
-        image: docker:dind
-        options: --privileged
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4

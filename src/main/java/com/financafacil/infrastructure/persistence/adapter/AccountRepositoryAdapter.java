@@ -63,4 +63,9 @@ public class AccountRepositoryAdapter implements AccountRepository {
     public boolean hasTransactions(UUID accountId) {
         return jpaRepository.hasTransactions(accountId);
     }
+
+    @Override
+    public boolean hasTransfers(UUID accountId) {
+        return jpaRepository.hasTransfers(accountId);
+    }
 }

@@ -64,8 +64,8 @@ public class AccountUseCaseImpl implements AccountUseCase {
         if (!accountRepository.existsByIdAndUserId(accountId, userId)) {
             throw new NotFoundException("Conta não encontrada");
         }
-        if (accountRepository.hasTransactions(accountId)) {
-            throw new ConflictException("Não é possível remover uma conta com transações");
+        if (accountRepository.hasTransactions(accountId) || accountRepository.hasTransfers(accountId)) {
+            throw new ConflictException("Não é possível remover uma conta com transações ou transferências");
         }
         accountRepository.deleteById(accountId, userId);
     }

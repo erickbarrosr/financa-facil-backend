@@ -3,6 +3,7 @@ package com.financafacil.application.usecase;
 import com.financafacil.domain.exception.NotFoundException;
 import com.financafacil.domain.model.RecurringTransaction;
 import com.financafacil.domain.port.out.AccountRepository;
+import com.financafacil.domain.port.out.CategoryRepository;
 import com.financafacil.domain.port.out.RecurringTransactionRepository;
 import com.financafacil.presentation.dto.response.RecurringTransactionResponse;
 import com.financafacil.presentation.mapper.RecurringTransactionPresentationMapper;
@@ -25,6 +26,7 @@ class RecurringTransactionUseCaseImplTest {
     @Mock RecurringTransactionRepository recurringTransactionRepository;
     @Mock RecurringTransactionPresentationMapper presentationMapper;
     @Mock AccountRepository accountRepository;
+    @Mock CategoryRepository categoryRepository;
     @InjectMocks RecurringTransactionUseCaseImpl recurringTransactionUseCase;
 
     private final UUID userId = UUID.randomUUID();
@@ -110,12 +112,51 @@ class RecurringTransactionUseCaseImplTest {
     }
 
     @Test
+    void create_throwsNotFound_whenCategoryNotBelongsToUser() {
+        var categoryId = UUID.randomUUID();
+        when(accountRepository.existsByIdAndUserId(accountId, userId)).thenReturn(true);
+        when(categoryRepository.existsByIdAndUserId(categoryId, userId)).thenReturn(false);
+
+        assertThatThrownBy(() -> recurringTransactionUseCase.create(
+            userId, accountId, categoryId, BigDecimal.valueOf(100), "expense", "monthly",
+            LocalDate.now()))
+            .isInstanceOf(NotFoundException.class)
+            .hasMessageContaining("Categoria");
+    }
+
+    @Test
     void update_throwsNotFound_whenNotExists() {
         var id = UUID.randomUUID();
         when(recurringTransactionRepository.findById(id, userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> recurringTransactionUseCase.update(userId, id, null, null, null, null, null, null))
             .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    void update_throwsNotFound_whenNewAccountNotBelongsToUser() {
+        var id = UUID.randomUUID();
+        var newAccountId = UUID.randomUUID();
+        var rt = buildRecurring(true);
+        when(recurringTransactionRepository.findById(id, userId)).thenReturn(Optional.of(rt));
+        when(accountRepository.existsByIdAndUserId(newAccountId, userId)).thenReturn(false);
+
+        assertThatThrownBy(() -> recurringTransactionUseCase.update(userId, id, newAccountId, null, null, null, null, null))
+            .isInstanceOf(NotFoundException.class)
+            .hasMessageContaining("Conta");
+    }
+
+    @Test
+    void update_throwsNotFound_whenNewCategoryNotBelongsToUser() {
+        var id = UUID.randomUUID();
+        var newCategoryId = UUID.randomUUID();
+        var rt = buildRecurring(true);
+        when(recurringTransactionRepository.findById(id, userId)).thenReturn(Optional.of(rt));
+        when(categoryRepository.existsByIdAndUserId(newCategoryId, userId)).thenReturn(false);
+
+        assertThatThrownBy(() -> recurringTransactionUseCase.update(userId, id, null, newCategoryId, null, null, null, null))
+            .isInstanceOf(NotFoundException.class)
+            .hasMessageContaining("Categoria");
     }
 
     private RecurringTransaction buildRecurring(boolean active) {

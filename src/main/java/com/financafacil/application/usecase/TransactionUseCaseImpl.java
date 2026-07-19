@@ -4,6 +4,7 @@ import com.financafacil.domain.exception.NotFoundException;
 import com.financafacil.domain.model.Transaction;
 import com.financafacil.domain.port.in.TransactionUseCase;
 import com.financafacil.domain.port.out.AccountRepository;
+import com.financafacil.domain.port.out.CategoryRepository;
 import com.financafacil.domain.port.out.TransactionRepository;
 import com.financafacil.domain.port.out.TransactionRepository.TransactionFilter;
 import com.financafacil.presentation.dto.response.PageResponse;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 public class TransactionUseCaseImpl implements TransactionUseCase {
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
+    private final CategoryRepository categoryRepository;
     private final TransactionPresentationMapper presentationMapper;
 
     @Override
@@ -33,6 +35,9 @@ public class TransactionUseCaseImpl implements TransactionUseCase {
         // Validate account ownership
         if (!accountRepository.existsByIdAndUserId(accountId, userId)) {
             throw new NotFoundException("Conta não encontrada");
+        }
+        if (categoryId != null && !categoryRepository.existsByIdAndUserId(categoryId, userId)) {
+            throw new NotFoundException("Categoria não encontrada");
         }
 
         var transaction = transactionRepository.save(Transaction.builder()
@@ -73,6 +78,9 @@ public class TransactionUseCaseImpl implements TransactionUseCase {
             if (!accountRepository.existsByIdAndUserId(accountId, userId)) {
                 throw new NotFoundException("Conta de destino não encontrada");
             }
+        }
+        if (categoryId != null && !categoryRepository.existsByIdAndUserId(categoryId, userId)) {
+            throw new NotFoundException("Categoria não encontrada");
         }
 
         // Apply new balance effect on the (potentially new) account

@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -46,9 +47,11 @@ public class TransactionController {
             @RequestParam(defaultValue = "transactionDate,desc") String sort) {
         var filter = new TransactionFilter(startDate, endDate, categoryId, accountId, type, status);
         var parts = sort.split(",");
+        var allowedSortFields = Set.of("transactionDate", "amount", "createdAt");
+        var sortField = allowedSortFields.contains(parts[0]) ? parts[0] : "transactionDate";
         var pageable = PageRequest.of(page, size,
             Sort.by(parts.length > 1 && "asc".equalsIgnoreCase(parts[1]) ? Sort.Direction.ASC : Sort.Direction.DESC,
-                parts[0]));
+                sortField));
         return ApiResponse.ok(transactionUseCase.findAll(toUuid(principal), filter, pageable));
     }
 

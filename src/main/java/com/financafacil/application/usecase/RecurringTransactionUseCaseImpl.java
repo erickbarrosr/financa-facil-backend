@@ -4,6 +4,7 @@ import com.financafacil.domain.exception.NotFoundException;
 import com.financafacil.domain.model.RecurringTransaction;
 import com.financafacil.domain.port.in.RecurringTransactionUseCase;
 import com.financafacil.domain.port.out.AccountRepository;
+import com.financafacil.domain.port.out.CategoryRepository;
 import com.financafacil.domain.port.out.RecurringTransactionRepository;
 import com.financafacil.presentation.dto.response.RecurringTransactionResponse;
 import com.financafacil.presentation.mapper.RecurringTransactionPresentationMapper;
@@ -24,6 +25,7 @@ public class RecurringTransactionUseCaseImpl implements RecurringTransactionUseC
     private final RecurringTransactionRepository recurringTransactionRepository;
     private final RecurringTransactionPresentationMapper presentationMapper;
     private final AccountRepository accountRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
     @Transactional
@@ -32,6 +34,9 @@ public class RecurringTransactionUseCaseImpl implements RecurringTransactionUseC
                                                LocalDate nextExecution) {
         if (!accountRepository.existsByIdAndUserId(accountId, userId)) {
             throw new NotFoundException("Conta não encontrada");
+        }
+        if (categoryId != null && !categoryRepository.existsByIdAndUserId(categoryId, userId)) {
+            throw new NotFoundException("Categoria não encontrada");
         }
         var recurring = recurringTransactionRepository.save(RecurringTransaction.builder()
             .id(UUID.randomUUID())
@@ -65,8 +70,18 @@ public class RecurringTransactionUseCaseImpl implements RecurringTransactionUseC
             .orElseThrow(() -> new NotFoundException("Transação recorrente não encontrada"));
 
         var candidate = existing;
-        if (accountId != null) { candidate = candidate.withAccountId(accountId); }
-        if (categoryId != null) { candidate = candidate.withCategoryId(categoryId); }
+        if (accountId != null) {
+            if (!accountRepository.existsByIdAndUserId(accountId, userId)) {
+                throw new NotFoundException("Conta não encontrada");
+            }
+            candidate = candidate.withAccountId(accountId);
+        }
+        if (categoryId != null) {
+            if (!categoryRepository.existsByIdAndUserId(categoryId, userId)) {
+                throw new NotFoundException("Categoria não encontrada");
+            }
+            candidate = candidate.withCategoryId(categoryId);
+        }
         if (amount != null) { candidate = candidate.withAmount(amount); }
         if (type != null) { candidate = candidate.withType(type); }
         if (frequency != null) { candidate = candidate.withFrequency(frequency); }

@@ -29,4 +29,7 @@ public interface AccountJpaRepository extends JpaRepository<AccountJpaEntity, UU
 
     @Query(value = "SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END FROM transactions WHERE account_id = :accountId", nativeQuery = true)
     boolean hasTransactions(@Param("accountId") UUID accountId);
+
+    @Query("SELECT CASE WHEN COUNT(t) > 0 THEN true ELSE false END FROM TransferJpaEntity t WHERE t.fromAccountId = :accountId OR t.toAccountId = :accountId")
+    boolean hasTransfers(@Param("accountId") UUID accountId);
 }

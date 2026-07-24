@@ -8,6 +8,7 @@ RUN mvn package -DskipTests --no-transfer-progress
 
 # ---- Stage 2: Runtime ----
 FROM eclipse-temurin:21-jre-alpine
+RUN apk upgrade --no-cache
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar

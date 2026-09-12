@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+
+    <!-- False positives from Lombok @RequiredArgsConstructor injection.
+         Spring manages the lifecycle; these fields are never externally mutated. -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+    </Match>
+
+    <!-- False positives from Lombok @With generated withXxx methods.
+         The generated code uses == on String parameters, which is valid
+         for checking identity (same reference) as used by Lombok. -->
+    <Match>
+        <Bug pattern="ES_COMPARING_PARAMETER_STRING_WITH_EQ"/>
+    </Match>
+
+    <!-- Spring Security config throws in constructor intentionally. -->
+    <Match>
+        <Bug pattern="CT_CONSTRUCTOR_THROW"/>
+    </Match>
+
+</FindBugsFilter>

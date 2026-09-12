@@ -1,0 +1,15 @@
+spring:
+  jpa:
+    show-sql: false
+
+management:
+  endpoint:
+    health:
+      show-details: when-authorized
+
+logging:
+  pattern:
+    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%p","logger":"%logger{36}","message":"%m"}%n'
+  level:
+    root: ${LOG_LEVEL:INFO}
+    com.financafacil: ${LOG_LEVEL:INFO}
